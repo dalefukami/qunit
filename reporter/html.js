@@ -565,6 +565,7 @@ export function escapeText( s ) {
 
 		for ( i = 0, l = modules.length; i < l; i++ ) {
 			moduleObj = modules[ i ];
+			appendModuleName( moduleObj.name );
 
 			for ( x = 0, z = moduleObj.tests.length; x < z; x++ ) {
 				test = moduleObj.tests[ x ];
@@ -572,6 +573,37 @@ export function escapeText( s ) {
 				appendTest( test.name, test.testId, moduleObj.name );
 			}
 		}
+	}
+
+	function appendModuleName( name ) {
+		var block, title, runModuleTrigger,
+			module = getModule( name ),
+			tests = id( "qunit-tests" );
+
+		if ( !tests ) {
+			return;
+		}
+
+		block = document.createElement( "li" );
+
+		title = document.createElement( "strong" );
+		title.innerHTML = escapeText( module.name );
+
+		runModuleTrigger = document.createElement( "a" );
+		runModuleTrigger.innerHTML = "Run module";
+		runModuleTrigger.href = setUrl( { moduleId: module.moduleId } );
+
+		block.appendChild( title );
+		block.appendChild( runModuleTrigger );
+		block.id = "qunit-module-output-" + module.moduleId;
+
+		tests.appendChild( block );
+	}
+
+	function getModule( name ) {
+		return QUnit.config.modules.find( function nameMatches( module ) {
+			return module.name === name;
+		} );
 	}
 
 	function appendTest( name, testId, moduleName ) {
@@ -714,6 +746,10 @@ export function escapeText( s ) {
 		return nameHtml;
 	}
 
+	QUnit.moduleStart( function( details ) {
+		setModuleClass( details.name, "running" );
+	} );
+
 	QUnit.testStart( function( details ) {
 		var running, testBlock, bad;
 
@@ -737,6 +773,13 @@ export function escapeText( s ) {
 		}
 
 	} );
+
+	function setModuleClass( moduleName, className ) {
+		var moduleClass = "module-" + className,
+			moduleBlock = id( "qunit-module-output-" + getModule( moduleName ).moduleId );
+
+		moduleBlock.className = moduleClass;
+	}
 
 	function stripHtml( string ) {
 
@@ -933,6 +976,20 @@ export function escapeText( s ) {
 			} );
 			testItem.appendChild( sourceName );
 		}
+	} );
+
+	QUnit.moduleDone( function( details ) {
+		if ( details.failed > 0 ) {
+			setModuleClass( details.name, "failed" );
+			return;
+		}
+
+		if ( details.tests.some( function( test ) { return test.skip; } ) ) {
+			setModuleClass( details.name, "skipped" );
+			return;
+		}
+
+		setModuleClass( "passed" );
 	} );
 
 // Avoid readyState issue with phantomjs

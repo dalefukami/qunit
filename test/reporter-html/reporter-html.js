@@ -29,7 +29,12 @@ QUnit.test( "<script id='qunit-unescaped-test'>'test';</script>", function( asse
 	assert.ok( true, "<script id='qunit-unescaped-asassertionsert'>'assertion';</script>" );
 } );
 
-QUnit.module( "display test info" );
+QUnit.module( "display test info", {
+	getPreviousTest: function( assert ) {
+		return document.getElementById( "qunit-test-output-" + assert.test.testId  )
+			.previousSibling;
+	}
+} );
 
 QUnit.test( "running test name displayed", function( assert ) {
 	assert.expect( 2 );
@@ -42,6 +47,15 @@ QUnit.test( "running test name displayed", function( assert ) {
 	assert.ok( /display test info/.test( displaying.innerHTML ),
 		"Expect module name to be found in displayed text"
 	);
+} );
+
+QUnit.test( "previous test displays filtering run options", function( assert ) {
+	assert.expect( 1 );
+
+	var previous = this.getPreviousTest( assert ),
+		filteringLinks = previous.getElementsByTagName( "a" );
+
+	assert.strictEqual( filteringLinks[ 0 ].innerHTML, "Rerun", "'Rerun' link displayed" );
 } );
 
 QUnit.module( "timing", {
@@ -129,3 +143,62 @@ QUnit.test( "logs location", function( assert ) {
 		"Source references to the current file and line number"
 	);
 } );
+
+QUnit.module( "module list item", {
+	getPreviousModule: function( assert ) {
+		var element  = document.getElementById(
+			"qunit-module-output-" + assert.test.module.moduleId
+		).previousSibling;
+
+		while ( element && element.id.indexOf( "qunit-module-output-" ) !== 0 ) {
+			element = element.previousSibling;
+		}
+
+		return element;
+	}
+}, function() {
+	QUnit.module( "running state", function() {
+		QUnit.test( "is running when first test runs", function( assert ) {
+			var moduleItem = document.getElementById(
+				"qunit-module-output-" + assert.test.module.moduleId
+			);
+
+			assert.strictEqual( moduleItem.className, "module-running",
+				"Module marked as running" );
+		} );
+	} );
+
+	QUnit.module( "passed state", function() {
+		QUnit.test( "is passed after all tests passed", function( assert ) {
+			var moduleItem = this.getPreviousModule( assert );
+
+			assert.strictEqual( moduleItem.className, "module-pass",
+				"Module marked as pass" );
+		} );
+	} );
+
+	QUnit.module( "Module with a skipped test", function() {
+		QUnit.skip( "A skipped test", function() { } );
+	} );
+
+	QUnit.module( "skipped state", function() {
+		QUnit.test( "is skipped after skipping a test", function( assert ) {
+			var moduleItem = this.getPreviousModule( assert );
+
+			assert.strictEqual( moduleItem.className, "module-skipped",
+				"Module marked as skipped" );
+		} );
+	} );
+
+	QUnit.test( "contains link to run module", function( assert ) {
+		var moduleItem = document.getElementById(
+			"qunit-module-output-" + assert.test.module.moduleId
+		),
+			link = moduleItem.getElementsByTagName( "a" );
+
+		assert.strictEqual( link[ 0 ].innerHTML, "Run module",
+			"'Run module' link displayed"
+		);
+	} );
+} );
+

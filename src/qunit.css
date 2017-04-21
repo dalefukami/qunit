@@ -227,7 +227,12 @@
 #qunit-tests li.pass,
 #qunit-tests li.fail,
 #qunit-tests li.skipped,
-#qunit-tests li.aborted {
+#qunit-tests li.aborted,
+#qunit-tests li.module-running,
+#qunit-tests li.module-pass,
+#qunit-tests li.module-fail,
+#qunit-tests li.module-skipped,
+#qunit-tests li.module-aborted {
 	display: list-item;
 }
 
@@ -236,7 +241,9 @@
 }
 
 #qunit-tests.hidepass li.running,
-#qunit-tests.hidepass li.pass:not(.todo) {
+#qunit-tests.hidepass li.pass:not(.todo),
+#qunit-tests.hidepass li.module-running,
+#qunit-tests.hidepass li.module-pass {
 	visibility: hidden;
 	position: absolute;
 	width:   0;
@@ -351,6 +358,8 @@
 #qunit-tests .pass .test-actual,
 #qunit-tests .pass .test-expected           { color: #999; }
 
+#qunit-tests .module-pass                   { color: #528CE0; background-color: #D2E0E6; }
+
 #qunit-banner.qunit-pass                    { background-color: #C6E746; }
 
 /*** Failing Styles */
@@ -373,6 +382,8 @@
 #qunit-tests .fail .test-actual             { color: #EE5757; }
 #qunit-tests .fail .test-expected           { color: #008000; }
 
+#qunit-tests .module-fail                   { color: #000; background-color: #EE5757; }
+
 #qunit-banner.qunit-fail                    { background-color: #EE5757; }
 
 
@@ -380,7 +391,8 @@
 #qunit-tests .aborted { color: #000; background-color: orange; }
 /*** Skipped tests */
 
-#qunit-tests .skipped {
+#qunit-tests .skipped,
+#qunit-tests .module-skipped {
 	background-color: #EBECE9;
 }
 
