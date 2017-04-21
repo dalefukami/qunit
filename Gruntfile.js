@@ -177,7 +177,8 @@ module.exports = function( grunt ) {
 			options: {
 				atBegin: true,
 				spawn: false,
-				interrupt: true
+				interrupt: true,
+				livereload: true //XXX Don't commit this
 			},
 			files: [
 				".eslintrc.json",
@@ -187,7 +188,7 @@ module.exports = function( grunt ) {
 				"src/qunit.css",
 				"test/**/*.html"
 			],
-			tasks: "default"
+			tasks: "build"
 		},
 
 		instrument: {
